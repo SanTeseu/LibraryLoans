@@ -1,0 +1,17 @@
+
+{
+  "development": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "sqlite",
+    "storage": "./database/bibliotech.sqlite"
+  },
+  "test": {
+    "dialect": "sqlite",
+    "storage": ":memory:"
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "sqlite",
+    "storage": "./database/bibliotech.sqlite"
+  }
+}
