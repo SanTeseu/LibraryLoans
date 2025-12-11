@@ -1,38 +1,51 @@
+const bcrypt = require("bcryptjs");
+
 module.exports = (sequelize, DataTypes) => {
-  const Funcionario = sequelize.define('Funcionario', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    nome: { 
-      type: DataTypes.STRING, 
-      allowNull: false 
-    },
-    email: { 
-      type: DataTypes.STRING, 
-      unique: true, // RF01: E-mail único
-      allowNull: false 
-    },
-    senha_hash: { 
-      type: DataTypes.STRING, 
-      allowNull: false 
-    },
-    perfil: { 
-      type: DataTypes.ENUM('admin', 'bibliotecario'), // RF01: perfies definidos
-      allowNull: false,
-      defaultValue: 'bibliotecario' 
-    },
-    status: { 
-      type: DataTypes.BOOLEAN, 
-      allowNull: false,
-      defaultValue: true // RN01: status é booleano e default é ativo
-    }
-  }, {
-    tableName: 'funcionarios', // nome da tabela no banco
-    timestamps: true, // habilita campos de data/hora no db
-    underscored: true, // Usa snake_case para colunas automáticas
-  });
-  
-  return Funcionario;
+    const Funcionario = sequelize.define("Funcionario", {
+        nome: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+            validate: {
+                isEmail: true
+            }
+        },
+        senha: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        role: {
+            type: DataTypes.STRING,
+            defaultValue: "admin"
+        },
+        ativo: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true
+        }
+    });
+
+    //  Antes de criar, hash da senha
+    Funcionario.beforeCreate(async (funcionario) => {
+        const salt = await bcrypt.genSalt(10);
+        funcionario.senha = await bcrypt.hash(funcionario.senha, salt);
+    });
+
+    //  Antes de atualizar, hash da senha SE for alterada
+    Funcionario.beforeUpdate(async (funcionario) => {
+        if (funcionario.changed("senha")) {
+            const salt = await bcrypt.genSalt(10);
+            funcionario.senha = await bcrypt.hash(funcionario.senha, salt);
+        }
+    });
+
+    //  Método para validar senha no login
+    Funcionario.prototype.validarSenha = async function (senhaDigitada) {
+        return await bcrypt.compare(senhaDigitada, this.senha);
+    };
+
+    return Funcionario;
 };

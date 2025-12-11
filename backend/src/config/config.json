@@ -1,7 +1,5 @@
-
 {
   "development": {
-    "use_env_variable": "DATABASE_URL",
     "dialect": "sqlite",
     "storage": "./database/bibliotech.sqlite"
   },
@@ -10,7 +8,6 @@
     "storage": ":memory:"
   },
   "production": {
-    "use_env_variable": "DATABASE_URL",
     "dialect": "sqlite",
     "storage": "./database/bibliotech.sqlite"
   }

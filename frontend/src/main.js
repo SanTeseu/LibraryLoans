@@ -1,7 +1,17 @@
-import { createApp, reactive } from 'vue';
-import App from './App.vue';
-import router from './router';
+import { createApp } from "vue";
+import App from "./App.vue";
+import router from "./router";
+import { createPinia } from "pinia";
+
+// Importa CSS global
+import "./assets/style.css";
+
+// Cria app
 const app = createApp(App);
-app.config.globalProperties.$userState = reactive({ token: localStorage.getItem('token') || null });
+
+// Instala Pinia e Router
+app.use(createPinia());
 app.use(router);
-app.mount('#app');
+
+// Monta
+app.mount("#app");

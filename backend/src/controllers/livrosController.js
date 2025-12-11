@@ -1,49 +1,60 @@
-const { Livro, Emprestimo } = require('../models');
-const { validationResult } = require('express-validator');
+const db = require("../models");
 
-async function list(req, res){
-  const q = {};
-  if(req.query.titulo) q.titulo = req.query.titulo;
-  const livros = await Livro.findAll();
-  return res.json(livros);
-}
+module.exports = {
 
-async function disponibilidade(req, res){
-  const id = req.params.id;
-  const livro = await Livro.findByPk(id);
-  if(!livro) return res.status(404).json({ error: 'Livro não encontrado' });
-  const ativos = await Emprestimo.count({ where: { livroId: id, status: 'ativo' }});
-  const disponiveis = livro.exemplares_total - ativos;
-  return res.json({ disponiveis: Math.max(0, disponiveis), exemplares_total: livro.exemplares_total });
-}
+    async listar(req, res) {
+        try {
+            const livros = await db.Livro.findAll();
+            return res.json(livros);
+        } catch (err) {
+            console.error("Erro ao listar livros:", err);
+            return res.status(500).json({ error: "Erro ao listar livros" });
+        }
+    },
 
-async function create(req, res){
-  const errors = validationResult(req);
-  if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const { titulo, autor, isbn, exemplares_total } = req.body;
-  try {
-    const livro = await Livro.create({ titulo, autor, isbn, exemplares_total });
-    return res.status(201).json(livro);
-  } catch(e){
-    return res.status(400).json({ error: e.message });
-  }
-}
+    async criar(req, res) {
+        try {
+            const { titulo, autor } = req.body;
+            const livro = await db.Livro.create({ titulo, autor });
+            return res.json(livro);
+        } catch (err) {
+            console.error("Erro ao criar livro:", err);
+            return res.status(500).json({ error: "Erro ao criar livro" });
+        }
+    },
 
-async function update(req, res){
-  const id = req.params.id;
-  const livro = await Livro.findByPk(id);
-  if(!livro) return res.status(404).json({ error: 'Livro não encontrado' });
-  const { titulo, autor, isbn, exemplares_total, ativo } = req.body;
-  await livro.update({ titulo, autor, isbn, exemplares_total, ativo });
-  return res.json(livro);
-}
+    async atualizar(req, res) {
+        try {
+            const { id } = req.params;
+            const { titulo, autor } = req.body;
 
-async function remove(req, res){
-  const id = req.params.id;
-  const livro = await Livro.findByPk(id);
-  if(!livro) return res.status(404).json({ error: 'Livro não encontrado' });
-  await livro.destroy();
-  return res.json({ ok: true });
-}
+            const livro = await db.Livro.findByPk(id);
+            if (!livro) return res.status(404).json({ error: "Livro não encontrado" });
 
-module.exports = { list, disponibilidade, create, update, remove };
+            livro.titulo = titulo;
+            livro.autor = autor;
+            await livro.save();
+
+            return res.json(livro);
+        } catch (err) {
+            console.error("Erro ao atualizar livro:", err);
+            return res.status(500).json({ error: "Erro ao atualizar livro" });
+        }
+    },
+
+    async deletar(req, res) {
+        try {
+            const { id } = req.params;
+
+            const livro = await db.Livro.findByPk(id);
+            if (!livro) return res.status(404).json({ error: "Livro não encontrado" });
+
+            await livro.destroy();
+
+            return res.json({ message: "Livro deletado" });
+        } catch (err) {
+            console.error("Erro ao deletar livro:", err);
+            return res.status(500).json({ error: "Erro ao deletar livro" });
+        }
+    }
+};

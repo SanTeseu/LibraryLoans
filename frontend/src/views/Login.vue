@@ -3,59 +3,83 @@
     <div class="overlay">
       <form class="login-box" @submit.prevent="submit">
         <h2>Entrar</h2>
-        <input v-model="email" type="email" placeholder="Email" required />
-        <input v-model="senha" type="password" placeholder="Senha" required />
-        <div style="display: flex; gap: 8px; margin-top: 12px">
-          <button type="submit">Entrar</button>
-          <button type="button" @click="fillAdmin">Usar admin</button>
+
+        <input
+          v-model="email"
+          type="email"
+          placeholder="Email"
+          required
+        />
+
+        <input
+          v-model="senha"
+          type="password"
+          placeholder="Senha"
+          required
+        />
+
+        <div class="btn-row">
+          <button type="submit" class="btn-primary">Entrar</button>
+          <button type="button" class="btn-secondary" @click="fillAdmin">
+            Usar admin
+          </button>
         </div>
+
         <p v-if="error" class="error">{{ error }}</p>
       </form>
+
       <div class="attribution">
-        Imagem de fundo: Afrodite (dominio público) - Michelangelo
+        Imagem de fundo: A Nascença de Vênus – Botticelli (Domínio Público)
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import api from "../services/api";
-export default {
-  data() {
-    return { email: "", senha: "", error: null };
-  },
-  methods: {
-    async submit() {
-      this.error = null;
-      try {
-        const r = await api.post("/auth/login", {
-          email: this.email,
-          senha: this.senha,
-        });
-        localStorage.setItem("token", r.data.token);
-        this.$userState.token = r.data.token;
-        this.$router.push("/");
-      } catch (e) {
-        this.error = e?.response?.data?.error || "Erro";
-      }
-    },
-    fillAdmin() {
-      this.email = "admin@bibliotech.com";
-      this.senha = "Admin@123";
-    },
-  },
-};
+<script setup>
+import { ref } from "vue";
+import { useAuthStore } from "../stores/auth";
+import { useRouter } from "vue-router";
+
+const email = ref("");
+const senha = ref("");
+const error = ref(null);
+
+const auth = useAuthStore();
+const router = useRouter();
+
+async function submit() {
+  error.value = null;
+
+  const ok = await auth.login(email.value, senha.value);
+
+  if (!ok) {
+    error.value = "Email ou senha incorretos.";
+    return;
+  }
+
+  router.push("/");
+}
+
+function fillAdmin() {
+  email.value = "admin@bibliotech.com";
+  senha.value = "Admin@123";
+}
 </script>
+
 <style scoped>
+/* —————————————— */
+/* Fundo e overlay */
+/* —————————————— */
 .login-page {
   min-height: 100vh;
-  background-image: url('https://institutofreedom.com.br/blog/wp-content/uploads/2019/04/2017-03-09-2.jpg');
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1200px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .overlay {
   background: rgba(0, 0, 0, 0.45);
   min-height: 100vh;
@@ -65,38 +89,96 @@ export default {
   justify-content: center;
   flex-direction: column;
 }
+
+/* —————————————— */
+/* Card de login */
+/* —————————————— */
 .login-box {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 24px;
-  border-radius: 8px;
-  width: 320px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  padding: 26px;
+  border-radius: 10px;
+  width: 330px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
 }
+
 .login-box h2 {
-  margin: 0 0 12px 0;
   text-align: center;
+  margin-bottom: 14px;
+  font-weight: 600;
 }
+
+/* —————————————— */
+/* Inputs */
+/* —————————————— */
 .login-box input {
-  padding: 8px 10px;
-  margin: 6px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 10px 12px;
+  margin: 7px 0;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  transition: 0.2s;
+  font-size: 14px;
 }
-.login-box button {
+
+.login-box input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* —————————————— */
+/* Botões */
+/* —————————————— */
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.btn-primary {
+  flex: 1;
   padding: 8px 10px;
-  border-radius: 4px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
 }
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 8px 10px;
+  background: #64748b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #475569;
+}
+
 .error {
   color: red;
-  margin-top: 8px;
+  margin-top: 10px;
   text-align: center;
+  font-size: 14px;
 }
+
 .attribution {
-  color: #ddd;
-  margin-top: 12px;
+  color: #eee;
+  margin-top: 14px;
   font-size: 12px;
 }
 </style>

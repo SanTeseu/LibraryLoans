@@ -1,29 +1,28 @@
-// src/models/index.js
+const { Sequelize, DataTypes } = require("sequelize");
+const config = require("../config/config.json").development;
 
-const Sequelize = require('sequelize');
-const config = require('../config/database'); // Seus dados de conexão (storage, dialect, etc.)
-
-// 1. Cria a instância do Sequelize com a configuração
-const sequelize = new Sequelize(config);
+const sequelize = new Sequelize({
+    dialect: config.dialect,
+    storage: config.storage,
+    logging: false
+});
 
 const db = {};
 
-// 2. Carrega o modelo Funcionario, passando a instância 'sequelize' e 'DataTypes'
-const FuncionarioModel = require('./Funcionario');
-const Funcionario = FuncionarioModel(sequelize, Sequelize.DataTypes);
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
-db[Funcionario.name] = Funcionario;
+db.Funcionario = require("./funcionario")(sequelize, DataTypes);
+db.Livro = require("./livro")(sequelize, DataTypes);
+db.Membro = require("./membro")(sequelize, DataTypes);
+db.Emprestimo = require("./emprestimo")(sequelize, DataTypes);
 
-// Adicione aqui outros modelos (Livro, Membro, etc.) conforme você os cria
+db.Livro.hasMany(db.Emprestimo, { foreignKey: "livroId", as: "emprestimos" });
+db.Membro.hasMany(db.Emprestimo, { foreignKey: "membroId", as: "emprestimos" });
+db.Funcionario.hasMany(db.Emprestimo, { foreignKey: "funcionarioId", as: "emprestimos" });
 
-// 3. Associa modelos (necessário para relacionamentos, mesmo que vazio agora)
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
-
-db.sequelize = sequelize; // Instância de conexão
-db.Sequelize = Sequelize; // Módulo Sequelize
+db.Emprestimo.belongsTo(db.Livro, { foreignKey: "livroId" });
+db.Emprestimo.belongsTo(db.Membro, { foreignKey: "membroId" });
+db.Emprestimo.belongsTo(db.Funcionario, { foreignKey: "funcionarioId" });
 
 module.exports = db;

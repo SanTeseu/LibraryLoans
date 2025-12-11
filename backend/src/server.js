@@ -1,40 +1,46 @@
-// Carrega as variáveis de ambiente do arquivo .env
-require('dotenv').config();
-
-// Importa a instância da aplicação Express (middlewares, setup) do app.js
-const app = require('./app'); 
-
-// Importa o objeto do Sequelize para sincronização do DB
-const db = require('./models'); 
-
-// --- 🚨 CORREÇÃO DE IMPORTS 🚨 ---
-// Importa os arquivos de rotas usando os nomes corretos (ex: auth.js, livros.js, etc.)
-const routes = require('./routes'); // Importa o router principal (index.js)
-
-const PORT = process.env.PORT || 4000;
-
-// --- Registro das Rotas ---
-// Assumimos que o router principal (index.js) anexa todas as sub-rotas
-app.use('/api', routes); 
+const app = require("./app");
+const db = require('./models');
+const bcrypt = require("bcryptjs");
+const authRoutes = require('./routes/auth');
 
 
-// --- Inicialização do Servidor e Banco de Dados ---
-async function startServer() {
+app.use('/api/auth', authRoutes);
+
+const PORT = 4000;
+
+(async () => {
     try {
-        // Sincroniza o banco de dados (cria/atualiza tabelas se necessário)
-        // Isso também dispara a lógica de "seeding" no app.js, se você a manteve lá.
-        await db.sequelize.sync();
-        console.log('✅ Banco de dados sincronizado.');
+        await db.sequelize.authenticate();
+        console.log("Banco conectado com sucesso.");
 
-        app.listen(PORT, () => {
-            console.log(`🚀 Server running on port ${PORT}`);
+        await db.sequelize.sync();
+        console.log("Banco sincronizado.");
+
+        // ===== CRIAR ADMIN =====
+        const adminEmail = "admin@bibliotech.com";
+
+        const existingAdmin = await db.Funcionario.findOne({
+            where: { email: adminEmail }
         });
 
-    } catch (error) {
-        console.error('❌ Erro FATAL ao iniciar o servidor ou DB:', error);
-        // Termina o processo se houver erro crítico no banco de dados.
-        process.exit(1); 
-    }
-}
+        if (!existingAdmin) {
+            const hashed = await bcrypt.hash("Admin@123", 10);
 
-startServer();
+            await db.Funcionario.create({
+                nome: "Administrador",
+                email: adminEmail,
+                senha: hashed,
+                role: "admin",
+                ativo: true
+            });
+
+            console.log("Administrador padrão criado!");
+        }
+
+        app.listen(PORT, () =>
+            console.log("Servidor rodando na porta", PORT)
+        );
+    } catch (err) {
+        console.error("Erro ao iniciar:", err);
+    }
+})();

@@ -1,29 +1,77 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { jwtDecode } from 'jwt-decode';
+import { createRouter, createWebHistory } from "vue-router";
+import Login from "../views/Login.vue";
+import { useAuthStore } from "../stores/auth";
 
 const routes = [
-  // login
-  { path: '/login', component: () => import('../views/Login.vue') },
+  { path: "/login", component: Login },
 
-  // livros (RF04)
-  // rota raiz e listagem de livros (RF04)
-  { path: '/', component: () => import('../views/LivrosLista.vue'), meta: { requiresAuth: true } },
-  { path: '/livros/novo', component: () => import('../views/LivroFormulario.vue'), meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/livros/:id/edit', component: () => import('../views/LivroFormulario.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  // LIVROS
+  {
+    path: "/",
+    component: () => import("../views/livros/LivrosLista.vue"),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/livros/novo",
+    component: () => import("../views/livros/LivroFormulario.vue"),
+    meta: { requiresAuth: true, perfil: "admin" }
+  },
+  {
+    path: "/livros/:id/edit",
+    component: () => import("../views/livros/LivroFormulario.vue"),
+    meta: { requiresAuth: true, perfil: "admin" }
+  },
 
-  // membros (RF06)
-  { path: '/membros', component: () => import('../views/MembrosLista.vue'), meta: { requiresAuth: true } },
-  { path: '/membros/novo', component: () => import('../views/MembroFormulario.vue'), meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/membros/:id/edit', component: () => import('../views/MembroFormulario.vue'), meta: { requiresAuth: true, role: 'admin' } },
+  // MEMBROS
+  {
+    path: "/membros",
+    component: () => import("../views/membros/MembrosLista.vue"),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/membros/novo",
+    component: () => import("../views/membros/MembroFormulario.vue"),
+    meta: { requiresAuth: true, perfil: "admin" }
+  },
+  {
+    path: "/membros/:id/edit",
+    component: () => import("../views/membros/MembroFormulario.vue"),
+    meta: { requiresAuth: true, perfil: "admin" }
+  },
 
-  // empresstimos (RF07)
-  { path: '/emprestimos', component: () => import('../views/EmprestimosLista.vue'), meta: { requiresAuth: true } },
-  { path: '/emprestimos/novo', component: () => import('../views/EmprestimoFormulario.vue'), meta: { requiresAuth: true } },
+  // EMPRÉSTIMOS
+  {
+    path: "/emprestimos",
+    component: () => import("../views/emprestimos/EmprestimosLista.vue"),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/emprestimos/novo",
+    component: () => import("../views/emprestimos/EmprestimoFormulario.vue"),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/emprestimos/atrasados",
+    component: () => import("../views/emprestimos/EmprestimosAtrasados.vue"),
+    meta: { requiresAuth: true }
+  },
 
-  // funcionarios (RN04)
-  { path: '/funcionarios', component: () => import('../views/FuncionariosLista.vue'), meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/funcionarios/novo', component: () => import('../views/FuncionarioFormulario.vue'), meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/funcionarios/:id/edit', component: () => import('../views/FuncionarioFormulario.vue'), meta: { requiresAuth: true, role: 'admin' } }
+  // FUNCIONÁRIOS
+  {
+    path: "/funcionarios",
+    component: () => import("../views/funcionarios/FuncionariosLista.vue"),
+    meta: { requiresAuth: true, perfil: "admin" }
+  },
+  {
+    path: "/funcionarios/novo",
+    component: () => import("../views/funcionarios/FuncionarioFormulario.vue"),
+    meta: { requiresAuth: true, perfil: "admin" }
+  },
+  {
+    path: "/funcionarios/:id/edit",
+    component: () => import("../views/funcionarios/FuncionarioFormulario.vue"),
+    meta: { requiresAuth: true, perfil: "admin" }
+  }
 ];
 
 const router = createRouter({
@@ -31,41 +79,28 @@ const router = createRouter({
   routes
 });
 
-// JWT + Perfil (guard de navegação)
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem("token");
-  
-  // 1. rota de Login (Não deve ser acessada se já estiver logado)
-  if (to.path === '/login') {
-    if (token) {
-      return next('/'); 
-    } else {
-      return next(); 
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore();
+
+  if (!auth.initialized) {
+    await auth.loadUserFromToken();
+  }
+
+  const token = auth.token;
+
+  if (to.path === "/login" && token) return next("/");
+
+  if (to.meta.requiresAuth && !token) return next("/login");
+
+  if (to.meta.perfil) {
+    const userRole = auth.user?.perfil || auth.user?.role;
+    if (userRole !== to.meta.perfil) {
+      return next("/");
     }
   }
 
-  // 2. Rota Protegida (requiresAuth)
-  if (to.meta.requiresAuth && !token) {
-    return next('/login');
-  }
-
-  // 3. checagem de Perfill (RN04)
-  if (token) {
-    const user = jwtDecode(token);
-
-    if (!user) {
-      localStorage.removeItem("token");
-      return next('/login');
-    }
-
-    // Caso exija papel específico (adminOnly) e o perfil não corresponde (RN04)
-    if (to.meta.role && user.perfil !== to.meta.role) {
-      return next('/'); 
-    }
-  }
-
-  // 4. permite a navegação
   next();
 });
+
 
 export default router;

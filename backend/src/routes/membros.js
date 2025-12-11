@@ -1,26 +1,14 @@
-const express = require("express");
-const router = express.Router();
-const { body } = require("express-validator");
+// src/routes/membros.js
+const router = require('express').Router();
+const ctrl = require('../controllers/membrosController');
+const authenticate = require('../middlewares/authenticate');
+const role = require('../middlewares/role');
 
-const membros = require("../controllers/membrosController");
-const { auth, adminOnly } = require("../middlewares/auth");
-
-router.get("/", auth, membros.list);
-
-router.post(
-  "/",
-  auth,
-  adminOnly,
-  [
-    body("nome").notEmpty(),
-    body("email").isEmail(),
-    body("cpf").notEmpty()
-  ],
-  membros.create
-);
-
-router.put("/:id", auth, adminOnly, membros.update);
-
-router.delete("/:id", auth, adminOnly, membros.remove);
+router.get('/', authenticate, ctrl.list);
+router.post('/', authenticate, role('admin'), ctrl.create);
+router.get('/:id', authenticate, ctrl.get);
+router.put('/:id', authenticate, role('admin'), ctrl.update);
+router.delete('/:id', authenticate, role('admin'), ctrl.remove);
+router.get('/:id/emprestimos', authenticate, ctrl.emprestimosDoMembro);
 
 module.exports = router;

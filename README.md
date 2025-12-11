@@ -1,4 +1,4 @@
-Library&Loans - Scaffold
+BiblioTech - Scaffold
 ========================
 
 Conteúdo:

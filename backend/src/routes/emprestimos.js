@@ -1,25 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { body } = require("express-validator");
 
-const emprestimos = require("../controllers/emprestimosController");
-const { auth } = require("../middlewares/auth");
+const authenticate = require("../middlewares/authenticate");
+const role = require("../middlewares/role");
+const controller = require("../controllers/emprestimosController");
 
-router.get("/", auth, emprestimos.list);
-router.get("/atrasados", auth, emprestimos.atrasados);
-
-router.post(
-  "/",
-  auth,
-  [
-    body("livroId").isInt(),
-    body("membroId").isInt(),
-    body("data_retirada").isISO8601(),
-    body("data_devolucao_prevista").isISO8601()
-  ],
-  emprestimos.create
-);
-
-router.patch("/:id/devolver", auth, emprestimos.devolver);
+router.get("/", authenticate, controller.listar);
+router.post("/", authenticate, controller.criar);
+router.put("/:id/devolver", authenticate, controller.devolver);
+router.delete("/:id", authenticate, role("admin"), controller.remover);
 
 module.exports = router;

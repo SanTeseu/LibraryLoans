@@ -1,21 +1,68 @@
-// src/routes/index.js - CORRIGIDO com nomes abreviados
+import { createRouter, createWebHistory } from "vue-router";
+import Login from "../views/Login.vue";
+import Dashboard from "../views/Dashboard.vue";
 
-const express = require('express');
-const router = express.Router();
+import FuncionariosLista from "../views/FuncionariosLista.vue";
+import MembrosLista from "../views/MembrosLista.vue";
+import LivrosLista from "../views/LivrosLista.vue";
+import EmprestimosLista from "../views/EmprestimosLista.vue";
 
-// --- Importações Corretas ---
-// Se o arquivo de login for 'auth.js', os demais devem seguir o mesmo padrão:
-const auth = require('./auth');         // Módulo de rotas de autenticação (Login)
-const livros = require('./livros');     // Módulo de rotas de Livros
-const membros = require('./membros');   // Módulo de rotas de Membros
-const emprestimos = require('./emprestimos'); // Módulo de rotas de Empréstimos
+const routes = [
+    {
+        path: "/",
+        redirect: "/login"   // PRIMEIRA TELA = LOGIN
+    },
+    {
+        path: "/login",
+        name: "Login",
+        component: Login
+    },
+    {
+        path: "/dashboard",
+        name: "Dashboard",
+        component: Dashboard,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: "/funcionarios",
+        name: "Funcionarios",
+        component: FuncionariosLista,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: "/membros",
+        name: "Membros",
+        component: MembrosLista,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: "/livros",
+        name: "Livros",
+        component: LivrosLista,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: "/emprestimos",
+        name: "Emprestimos",
+        component: EmprestimosLista,
+        meta: { requiresAuth: true }
+    }
+];
 
-// --- Mapeamento das Rotas ---
-router.use('/auth', auth);      // Resulta em /api/auth/...
-router.use('/livros', livros);  // Resulta em /api/livros/...
-router.use('/membros', membros);   // Resulta em /api/membros/...
-router.use('/emprestimos', emprestimos); // Resulta em /api/emprestimos/...
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
+});
 
-router.get('/health', (req, res) => res.json({ status: 'ok' }));
+// ====== PROTEÇÃO DE ROTAS =======
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem("token");
 
-module.exports = router;
+    if (to.meta.requiresAuth && !token) {
+        next("/login");
+    } else {
+        next();
+    }
+});
+
+export default router;
