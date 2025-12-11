@@ -1,4 +1,3 @@
-// src/controllers/funcionariosController.js
 const bcrypt = require('bcryptjs');
 const db = require('../models');
 const Funcionario = db.Funcionario;

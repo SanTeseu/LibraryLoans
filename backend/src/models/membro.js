@@ -1,4 +1,3 @@
-// backend/src/models/membro.js
 module.exports = (sequelize, DataTypes) => {
   const Membro = sequelize.define("Membro", {
     nome: {

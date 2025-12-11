@@ -1,4 +1,3 @@
-// src/routes/membros.js
 const router = require('express').Router();
 const ctrl = require('../controllers/membrosController');
 const authenticate = require('../middlewares/authenticate');

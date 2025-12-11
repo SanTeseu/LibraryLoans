@@ -67,9 +67,9 @@ function fillAdmin() {
 </script>
 
 <style scoped>
-/* —————————————— */
+
 /* Fundo e overlay */
-/* —————————————— */
+
 .login-page {
   min-height: 100vh;
   background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1200px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg');
@@ -90,9 +90,9 @@ function fillAdmin() {
   flex-direction: column;
 }
 
-/* —————————————— */
-/* Card de login */
-/* —————————————— */
+
+/*  login */
+
 .login-box {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(4px);
@@ -110,9 +110,9 @@ function fillAdmin() {
   font-weight: 600;
 }
 
-/* —————————————— */
+
 /* Inputs */
-/* —————————————— */
+
 .login-box input {
   padding: 10px 12px;
   margin: 7px 0;
@@ -128,9 +128,9 @@ function fillAdmin() {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
-/* —————————————— */
+
 /* Botões */
-/* —————————————— */
+
 .btn-row {
   display: flex;
   gap: 8px;

@@ -1,4 +1,3 @@
-// src/controllers/membrosController.js
 const db = require('../models');
 const Membro = db.Membro;
 const Emprestimo = db.Emprestimo;

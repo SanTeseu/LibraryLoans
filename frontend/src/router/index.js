@@ -5,7 +5,7 @@ import { useAuthStore } from "../stores/auth";
 const routes = [
   { path: "/login", component: Login },
 
-  // LIVROS
+  
   {
     path: "/",
     component: () => import("../views/livros/LivrosLista.vue"),
@@ -22,7 +22,7 @@ const routes = [
     meta: { requiresAuth: true, perfil: "admin" }
   },
 
-  // MEMBROS
+  
   {
     path: "/membros",
     component: () => import("../views/membros/MembrosLista.vue"),
@@ -39,7 +39,7 @@ const routes = [
     meta: { requiresAuth: true, perfil: "admin" }
   },
 
-  // EMPRÉSTIMOS
+ 
   {
     path: "/emprestimos",
     component: () => import("../views/emprestimos/EmprestimosLista.vue"),
@@ -56,7 +56,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
 
-  // FUNCIONÁRIOS
+  
   {
     path: "/funcionarios",
     component: () => import("../views/funcionarios/FuncionariosLista.vue"),

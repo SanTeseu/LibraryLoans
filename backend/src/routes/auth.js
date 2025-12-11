@@ -3,7 +3,7 @@ const router = express.Router();
 
 const authController = require("../controllers/authController");
 
-// Todas as rotas de autenticação usam o controller novo
+// todas as rotas de autenticação usam o controller novo
 router.post("/login", authController.login);
 router.get("/me", authController.me);
 

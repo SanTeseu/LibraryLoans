@@ -1,4 +1,3 @@
-// seed.js
 const db = require("./models");
 const bcrypt = require("bcryptjs");
 
@@ -10,9 +9,7 @@ const bcrypt = require("bcryptjs");
         await db.sequelize.sync({ force: true });
         console.log("Tabelas recriadas!");
 
-        // ==========================
-        // FUNCIONÁRIOS
-        // ==========================
+        
         const adminPass = await bcrypt.hash("Admin@123", 10);
         const biblioPass = await bcrypt.hash("Biblio@123", 10);
 
@@ -32,9 +29,7 @@ const bcrypt = require("bcryptjs");
             ativo: true
         });
 
-        // ==========================
-        // MEMBROS
-        // ==========================
+       
         const ana = await db.Membro.create({
             nome: "Ana Costa",
             cpf: "111.222.333-44",
@@ -53,9 +48,7 @@ const bcrypt = require("bcryptjs");
             status: "suspenso"
         });
 
-        // ==========================
-        // LIVROS
-        // ==========================
+        
         const l1984 = await db.Livro.create({
             titulo: "1984",
             autor: "George Orwell",
@@ -88,10 +81,8 @@ const bcrypt = require("bcryptjs");
             quantidade: 2
         });
 
-        // ==========================
-        // EMPRÉSTIMOS
-        // ==========================
-        // 1) 1984 para Ana Costa - ativo
+       
+        
         await db.Emprestimo.create({
             livroId: l1984.id,
             membroId: ana.id,
@@ -100,7 +91,7 @@ const bcrypt = require("bcryptjs");
             dataPrevista: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
         });
 
-        // 2) Clean Code para Carlos - devolvido
+        
         await db.Emprestimo.create({
             livroId: cleanCode.id,
             membroId: carlos.id,
@@ -110,9 +101,9 @@ const bcrypt = require("bcryptjs");
             dataDevolucao: new Date()
         });
 
-        // 3) Sapiens para Julia - atrasado
+        
         const diasAtraso = 10;
-        const multa = diasAtraso * 2; // R$2 por dia
+        const multa = diasAtraso * 2; // 2 por dia
 
         await db.Emprestimo.create({
             livroId: sapiens.id,

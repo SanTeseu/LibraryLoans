@@ -1,4 +1,3 @@
-// src/middlewares/authenticate.js
 const jwt = require("jsonwebtoken");
 
 module.exports = function authenticate(req, res, next) {
